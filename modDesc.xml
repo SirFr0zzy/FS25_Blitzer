@@ -33,5 +33,15 @@
         <storeItem xmlFilename="objects/blitzer/blitzer.xml"/>
     </storeItems>
 
+    <actions>
+        <action name="BLITZER_SHOW_RANGE" category="ONFOOT" axisType="HALF"/>
+    </actions>
+
+    <inputBinding>
+        <actionBinding action="BLITZER_SHOW_RANGE">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_b" axisComponent="+" neutralInput="0" index="1"/>
+        </actionBinding>
+    </inputBinding>
+
     <l10n filenamePrefix="translations/l10n"/>
 </modDesc>

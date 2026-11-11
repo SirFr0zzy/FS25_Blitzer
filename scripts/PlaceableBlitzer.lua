@@ -9,6 +9,7 @@ PlaceableBlitzer.LIMIT_STEP = 10
 PlaceableBlitzer.FLASH_DURATION = 250      -- ms the flash light stays on
 PlaceableBlitzer.VEHICLE_COOLDOWN = 4000   -- ms before the same vehicle can be flashed again
 PlaceableBlitzer.INTERACT_DISTANCE = 3.0   -- m to the panel
+PlaceableBlitzer.RANGE_SHOW_TIME = 8000    -- ms the range outline stays visible
 
 function PlaceableBlitzer.prerequisitesPresent(specializations)
     return true
@@ -20,7 +21,7 @@ function PlaceableBlitzer.registerXMLPaths(schema)
     schema:register(XMLValueType.NODE_INDEX, "placeable.blitzer#panelNode", "Node of the operating panel on the column")
     schema:register(XMLValueType.NODE_INDEX, "placeable.blitzer#flashNode", "Flash light node (visibility toggled)")
     schema:register(XMLValueType.FLOAT, "placeable.blitzer#angle", "Detection cone angle in degrees", 90)
-    schema:register(XMLValueType.FLOAT, "placeable.blitzer#range", "Detection range in meters", 60)
+    schema:register(XMLValueType.FLOAT, "placeable.blitzer#range", "Detection range in meters", 30)
     schema:register(XMLValueType.INT, "placeable.blitzer#minLimit", "Lowest selectable limit (km/h)", 20)
     schema:register(XMLValueType.INT, "placeable.blitzer#maxLimit", "Highest selectable limit (km/h)", 150)
     schema:register(XMLValueType.INT, "placeable.blitzer#defaultLimit", "Default limit (km/h)", 50)
@@ -35,7 +36,10 @@ end
 
 function PlaceableBlitzer.registerFunctions(placeableType)
     SpecializationUtil.registerFunction(placeableType, "setBlitzerLimit", PlaceableBlitzer.setBlitzerLimit)
+    SpecializationUtil.registerFunction(placeableType, "showBlitzerRange", PlaceableBlitzer.showBlitzerRange)
     SpecializationUtil.registerFunction(placeableType, "onBlitzerFlash", PlaceableBlitzer.onBlitzerFlash)
+    SpecializationUtil.registerFunction(placeableType, "registerRangeAction", PlaceableBlitzer.registerRangeAction)
+    SpecializationUtil.registerFunction(placeableType, "removeRangeAction", PlaceableBlitzer.removeRangeAction)
     SpecializationUtil.registerFunction(placeableType, "checkBlitzerVehicles", PlaceableBlitzer.checkBlitzerVehicles)
 end
 
@@ -106,12 +110,13 @@ function PlaceableBlitzer:onLoad(savegame)
     spec.panelNode = xmlFile:getValue("placeable.blitzer#panelNode", nil, self.components, self.i3dMappings)
     spec.flashNode = xmlFile:getValue("placeable.blitzer#flashNode", nil, self.components, self.i3dMappings)
     spec.angle = xmlFile:getValue("placeable.blitzer#angle", 90)
-    spec.range = xmlFile:getValue("placeable.blitzer#range", 60)
+    spec.range = xmlFile:getValue("placeable.blitzer#range", 30)
     spec.minLimit = xmlFile:getValue("placeable.blitzer#minLimit", 20)
     spec.maxLimit = xmlFile:getValue("placeable.blitzer#maxLimit", 150)
     spec.speedLimit = xmlFile:getValue("placeable.blitzer#defaultLimit", 50)
 
     spec.flashTimer = 0
+    spec.rangeTimer = 0
     spec.cooldowns = {}
     spec.finalized = false
     spec.activatable = BlitzerActivatable.new(self)
@@ -134,6 +139,7 @@ function PlaceableBlitzer:onDelete()
     BlitzerManager.unregisterPlaceable(self)
     if spec.activatableAdded and g_currentMission ~= nil then
         g_currentMission.activatableObjectsSystem:removeActivatable(spec.activatable)
+        self:removeRangeAction()
     end
     spec.activatableAdded = false
 end
@@ -147,6 +153,12 @@ function PlaceableBlitzer:setBlitzerLimit(limit, noEventSend)
     BlitzerSetLimitEvent.sendEvent(self, limit, noEventSend)
     spec.speedLimit = limit
     spec.activatable:updateText()
+    self:showBlitzerRange()
+end
+
+function PlaceableBlitzer:showBlitzerRange()
+    self.spec_blitzer.rangeTimer = PlaceableBlitzer.RANGE_SHOW_TIME
+    self:raiseActive()
 end
 
 function PlaceableBlitzer:onBlitzerFlash()
@@ -212,6 +224,10 @@ function PlaceableBlitzer:onUpdate(dt)
         end
     end
 
+    if spec.rangeTimer > 0 then
+        spec.rangeTimer = spec.rangeTimer - dt
+    end
+
     -- offer the interaction while the local player stands near the panel
     if self.isClient and g_localPlayer ~= nil and spec.panelNode ~= nil then
         local x, y, z = getWorldTranslation(g_localPlayer.rootNode)
@@ -219,9 +235,11 @@ function PlaceableBlitzer:onUpdate(dt)
         if near and not spec.activatableAdded then
             g_currentMission.activatableObjectsSystem:addActivatable(spec.activatable)
             spec.activatableAdded = true
+            self:registerRangeAction()
         elseif not near and spec.activatableAdded then
             g_currentMission.activatableObjectsSystem:removeActivatable(spec.activatable)
             spec.activatableAdded = false
+            self:removeRangeAction()
         end
     end
 end
@@ -247,4 +265,75 @@ function PlaceableBlitzer:loadFromXMLFile(xmlFile, key)
         spec.speedLimit = math.clamp(limit, spec.minLimit, spec.maxLimit)
         spec.activatable:updateText()
     end
+end
+
+---------------------------------------------------------------------------
+-- Range outline (temporary)
+---------------------------------------------------------------------------
+
+-- key while standing at the panel
+function PlaceableBlitzer:registerRangeAction()
+    local spec = self.spec_blitzer
+    g_inputBinding:beginActionEventsModification()
+    local _, eventId = g_inputBinding:registerActionEvent(InputAction.BLITZER_SHOW_RANGE, self,
+        PlaceableBlitzer.onShowRangeAction, false, true, false, true)
+    g_inputBinding:endActionEventsModification()
+    if eventId ~= nil then
+        g_inputBinding:setActionEventText(eventId, g_i18n:getText("blitzer_showrange"))
+        g_inputBinding:setActionEventTextVisibility(eventId, true)
+        g_inputBinding:setActionEventTextPriority(eventId, GS_PRIO_NORMAL)
+    end
+    spec.rangeActionEventId = eventId
+end
+
+function PlaceableBlitzer:removeRangeAction()
+    local spec = self.spec_blitzer
+    if spec.rangeActionEventId ~= nil then
+        g_inputBinding:removeActionEvent(spec.rangeActionEventId)
+        spec.rangeActionEventId = nil
+    end
+end
+
+function PlaceableBlitzer:onShowRangeAction()
+    self:showBlitzerRange()
+end
+
+-- called every frame by BlitzerManager:draw()
+function PlaceableBlitzer.drawRange(placeable)
+    local spec = placeable.spec_blitzer
+    if spec == nil or spec.rangeTimer <= 0 or spec.sensorNode == nil then
+        return
+    end
+
+    local half = math.rad(spec.angle * 0.5)
+    local steps = 16
+    local function point(dist, a)
+        -- local direction (sin a, 0, cos a): +Z is the viewing direction
+        local wx, _, wz = localToWorld(spec.sensorNode, math.sin(a) * dist, 0, math.cos(a) * dist)
+        return wx, getTerrainHeightAtWorldPos(g_currentMission.terrainRootNode, wx, 0, wz) + 0.25, wz
+    end
+
+    local ox, _, oz = localToWorld(spec.sensorNode, 0, 0, 0)
+    local oy = getTerrainHeightAtWorldPos(g_currentMission.terrainRootNode, ox, 0, oz) + 0.25
+    local r, g, b = 1, 0.55, 0.05
+
+    -- two side edges
+    local lx, ly, lz = point(spec.range, -half)
+    local rx, ry, rz = point(spec.range, half)
+    drawDebugLine(ox, oy, oz, r, g, b, lx, ly, lz, r, g, b, false)
+    drawDebugLine(ox, oy, oz, r, g, b, rx, ry, rz, r, g, b, false)
+
+    -- outer arc plus an inner one at half range
+    for _, dist in ipairs({ spec.range, spec.range * 0.5 }) do
+        local px, py, pz = point(dist, -half)
+        for i = 1, steps do
+            local nx, ny, nz = point(dist, -half + (2 * half) * i / steps)
+            drawDebugLine(px, py, pz, r, g, b, nx, ny, nz, r, g, b, false)
+            px, py, pz = nx, ny, nz
+        end
+    end
+
+    -- centre line
+    local cx, cy, cz = point(spec.range, 0)
+    drawDebugLine(ox, oy, oz, 1, 0.9, 0.3, cx, cy, cz, 1, 0.9, 0.3, false)
 end

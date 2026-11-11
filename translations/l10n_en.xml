@@ -23,5 +23,7 @@
         <text name="blitzer_no_flashes" text="No flashes recorded yet."/>
         <text name="blitzer_day" text="Day"/>
         <text name="blitzer_limit_short" text="limit"/>
+        <text name="blitzer_showrange" text="Show range"/>
+        <text name="input_BLITZER_SHOW_RANGE" text="Speed camera: show range"/>
     </texts>
 </l10n>

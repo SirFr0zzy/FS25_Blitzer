@@ -57,7 +57,7 @@
     </ai>
 
     <blitzer sensorNode="sensorNode" panelNode="panelNode" flashNode="flashLight"
-             angle="90" range="60" minLimit="20" maxLimit="150" defaultLimit="50"/>
+             angle="90" range="30" minLimit="20" maxLimit="150" defaultLimit="50"/>
 
     <i3dMappings>
         <i3dMapping id="testAreaStart01" node="0>0|0" />

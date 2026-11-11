@@ -23,5 +23,7 @@
         <text name="blitzer_no_flashes" text="Noch keine Blitzungen."/>
         <text name="blitzer_day" text="Tag"/>
         <text name="blitzer_limit_short" text="Limit"/>
+        <text name="blitzer_showrange" text="Reichweite anzeigen"/>
+        <text name="input_BLITZER_SHOW_RANGE" text="Blitzer: Reichweite anzeigen"/>
     </texts>
 </l10n>

@@ -242,6 +242,12 @@ function BlitzerManager:loadMap()
     end
 end
 
+function BlitzerManager:draw()
+    for _, placeable in ipairs(BlitzerManager.placeables) do
+        PlaceableBlitzer.drawRange(placeable)
+    end
+end
+
 function BlitzerManager:deleteMap()
     BlitzerManager.frame = nil
     BlitzerManager.placeables = {}
