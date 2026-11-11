@@ -5,5 +5,9 @@
         <text name="speedgun_function" text="Measures the speed of vehicles."/>
         <text name="speedgun_measure" text="Measure speed"/>
         <text name="speedgun_no_target" text="No target"/>
+        <text name="blitzer_name" text="Speed Camera Column"/>
+        <text name="blitzer_function" text="Flashes vehicles in a 90 degree cone that exceed the set speed limit. The limit is set at the column."/>
+        <text name="blitzer_setLimit" text="Speed limit: %d %s (press to raise)"/>
+        <text name="blitzer_flashed" text="Flashed! %d %s in a %d %s zone"/>
     </texts>
 </l10n>

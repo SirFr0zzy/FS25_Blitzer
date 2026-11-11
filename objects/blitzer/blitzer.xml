@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<placeable type="blitzer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../shared/xml/schema/placeable.xsd">
+    <storeData>
+        <name>$l10n_blitzer_name</name>
+        <functions>
+            <function>$l10n_blitzer_function</function>
+        </functions>
+        <image>store_icon.dds</image>
+        <price>4500</price>
+        <dailyUpkeep>0</dailyUpkeep>
+        <lifetime>1000</lifetime>
+        <rotation>0</rotation>
+        <brand>NONE</brand>
+        <species>PLACEABLE</species>
+        <category>placeableMisc</category>
+        <canBeSold>true</canBeSold>
+        <showInStore>true</showInStore>
+        <vertexBufferMemoryUsage>0</vertexBufferMemoryUsage>
+        <indexBufferMemoryUsage>0</indexBufferMemoryUsage>
+        <textureMemoryUsage>0</textureMemoryUsage>
+        <instanceVertexBufferMemoryUsage>0</instanceVertexBufferMemoryUsage>
+        <instanceIndexBufferMemoryUsage>0</instanceIndexBufferMemoryUsage>
+
+        <brush>
+            <type>placeable</type>
+            <category>decoration</category>
+            <tab>uncategorized</tab>
+        </brush>
+        <audioMemoryUsage>0</audioMemoryUsage>
+    </storeData>
+
+    <base>
+        <filename>objects/blitzer/blitzer.i3d</filename>
+    </base>
+
+    <placement useRandomYRotation="false" useManualYRotation="true">
+        <testAreas>
+            <testArea startNode="testAreaStart01" endNode="testAreaEnd01" />
+        </testAreas>
+        <sounds>
+            <place template="smallImp" pitchScale="1.6"/>
+        </sounds>
+    </placement>
+
+    <clearAreas />
+    <leveling />
+    <indoorAreas/>
+
+    <tipOcclusionUpdateAreas>
+        <tipOcclusionUpdateArea startNode="testAreaStart01" endNode="testAreaEnd01" />
+    </tipOcclusionUpdateAreas>
+
+    <ai>
+        <updateAreas>
+            <updateArea startNode="testAreaStart01" endNode="testAreaEnd01" />
+        </updateAreas>
+    </ai>
+
+    <blitzer sensorNode="sensorNode" panelNode="panelNode" flashNode="flashLight"
+             angle="90" range="60" minLimit="20" maxLimit="150" defaultLimit="50"/>
+
+    <i3dMappings>
+        <i3dMapping id="testAreaStart01" node="0>0|0" />
+        <i3dMapping id="testAreaEnd01" node="0>0|0|0" />
+        <i3dMapping id="sensorNode" node="0>2" />
+        <i3dMapping id="panelNode" node="0>3" />
+        <i3dMapping id="flashLight" node="0>4" />
+    </i3dMappings>
+</placeable>

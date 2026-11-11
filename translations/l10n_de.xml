@@ -5,5 +5,9 @@
         <text name="speedgun_function" text="Misst die Geschwindigkeit von Fahrzeugen."/>
         <text name="speedgun_measure" text="Geschwindigkeit messen"/>
         <text name="speedgun_no_target" text="Kein Ziel"/>
+        <text name="blitzer_name" text="Blitzersäule"/>
+        <text name="blitzer_function" text="Blitzt Fahrzeuge in einem 90-Grad-Bereich, die das eingestellte Tempolimit überschreiten. Das Limit wird an der Säule eingestellt."/>
+        <text name="blitzer_setLimit" text="Tempolimit: %d %s (erhöhen)"/>
+        <text name="blitzer_flashed" text="Geblitzt! %d %s in einer %d %s Zone"/>
     </texts>
 </l10n>
