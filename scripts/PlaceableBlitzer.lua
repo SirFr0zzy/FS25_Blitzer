@@ -68,7 +68,7 @@ end
 
 function BlitzerActivatable:updateText()
     local spec = self.placeable.spec_blitzer
-    self.activateText = string.format(g_i18n:getText("blitzer_setLimit"),
+    self.activateText = string.format(g_i18n:getText("blitzer_setlimit"),
         g_i18n:getSpeed(spec.speedLimit), g_i18n:getSpeedMeasuringUnit())
 end
 
