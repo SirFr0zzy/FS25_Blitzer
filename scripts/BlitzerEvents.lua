@@ -10,39 +10,45 @@ function BlitzerSetLimitEvent.emptyNew()
     return Event.new(BlitzerSetLimitEvent_mt)
 end
 
-function BlitzerSetLimitEvent.new(placeable, limit)
+function BlitzerSetLimitEvent.new(placeable, limit, range, angle)
     local self = BlitzerSetLimitEvent.emptyNew()
     self.placeable = placeable
     self.limit = limit
+    self.range = range
+    self.angle = angle
     return self
 end
 
 function BlitzerSetLimitEvent:readStream(streamId, connection)
     self.placeable = NetworkUtil.readNodeObject(streamId)
     self.limit = streamReadUInt8(streamId)
+    self.range = streamReadUInt8(streamId)
+    self.angle = streamReadUInt8(streamId)
     self:run(connection)
 end
 
 function BlitzerSetLimitEvent:writeStream(streamId, connection)
     NetworkUtil.writeNodeObject(streamId, self.placeable)
     streamWriteUInt8(streamId, self.limit)
+    streamWriteUInt8(streamId, self.range)
+    streamWriteUInt8(streamId, self.angle)
 end
 
 function BlitzerSetLimitEvent:run(connection)
     if not connection:getIsServer() then
         g_server:broadcastEvent(self, false, connection, self.placeable)
     end
-    if self.placeable ~= nil and self.placeable.setBlitzerLimit ~= nil then
-        self.placeable:setBlitzerLimit(self.limit, true)
+    if self.placeable ~= nil and self.placeable.setBlitzerSettings ~= nil then
+        self.placeable:setBlitzerSettings(self.limit, self.range, self.angle, true)
     end
 end
 
-function BlitzerSetLimitEvent.sendEvent(placeable, limit, noEventSend)
+function BlitzerSetLimitEvent.sendEvent(placeable, limit, range, angle, noEventSend)
     if noEventSend == nil or noEventSend == false then
         if g_server ~= nil then
-            g_server:broadcastEvent(BlitzerSetLimitEvent.new(placeable, limit), nil, nil, placeable)
+            g_server:broadcastEvent(BlitzerSetLimitEvent.new(placeable, limit, range, angle), nil, nil, placeable)
         else
-            g_client:getServerConnection():sendEvent(BlitzerSetLimitEvent.new(placeable, limit))
+            g_client:getServerConnection():sendEvent(BlitzerSetLimitEvent.new(placeable, limit, range, angle))
         end
     end
 end
@@ -128,6 +134,8 @@ function BlitzerLogEvent:writeStream(streamId, connection)
         streamWriteInt32(streamId, e.x)
         streamWriteInt32(streamId, e.z)
         streamWriteString(streamId, e.plate)
+        streamWriteString(streamId, e.vehicleName)
+        streamWriteString(streamId, e.xmlFilename)
         streamWriteUInt16(streamId, e.speed)
         streamWriteUInt8(streamId, e.limit)
         streamWriteUInt32(streamId, e.day)
@@ -144,6 +152,8 @@ function BlitzerLogEvent:readStream(streamId, connection)
         e.x = streamReadInt32(streamId)
         e.z = streamReadInt32(streamId)
         e.plate = streamReadString(streamId)
+        e.vehicleName = streamReadString(streamId)
+        e.xmlFilename = streamReadString(streamId)
         e.speed = streamReadUInt16(streamId)
         e.limit = streamReadUInt8(streamId)
         e.day = streamReadUInt32(streamId)

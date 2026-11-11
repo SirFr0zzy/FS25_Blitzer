@@ -25,5 +25,14 @@
         <text name="blitzer_limit_short" text="Limit"/>
         <text name="blitzer_showrange" text="Reichweite anzeigen"/>
         <text name="input_BLITZER_SHOW_RANGE" text="Blitzer: Reichweite anzeigen"/>
+        <text name="blitzer_changerange" text="Reichweite ändern"/>
+        <text name="blitzer_changeangle" text="Winkel ändern"/>
+        <text name="input_BLITZER_CHANGE_RANGE" text="Blitzer: Reichweite ändern"/>
+        <text name="input_BLITZER_CHANGE_ANGLE" text="Blitzer: Winkel ändern"/>
+        <text name="blitzer_col_area" text="Erfassungsbereich"/>
+        <text name="blitzer_col_vehicle" text="Fahrzeug"/>
+        <text name="blitzer_photo_title" text="Blitzerfoto"/>
+        <text name="blitzer_show_on_map" text="Auf der Karte anzeigen"/>
+        <text name="blitzer_hide_on_map" text="Von der Karte entfernen"/>
     </texts>
 </l10n>

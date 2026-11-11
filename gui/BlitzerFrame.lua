@@ -14,7 +14,15 @@ function BlitzerFrame.new(target)
     self.subCategoryTabs = {}
     self.blitzerRows = {}
     self.logRows = {}
-    self:setMenuButtonInfo({ { inputAction = InputAction.MENU_BACK } })
+    self.selectedBlitzer = nil
+    self.selectedLog = nil
+    self.mapButtonInfo = {
+        inputAction = InputAction.MENU_EXTRA_1,
+        text = g_i18n:getText("blitzer_show_on_map"),
+        callback = function() self:onClickShowOnMap() end,
+        disabled = true,
+    }
+    self:setMenuButtonInfo({ { inputAction = InputAction.MENU_BACK }, self.mapButtonInfo })
     return self
 end
 
@@ -24,6 +32,7 @@ function BlitzerFrame:onGuiSetupFinished()
         if list ~= nil then
             list:setDataSource(self)
             list:setDelegate(self)
+            list.onSelectionChanged = function(l, section, index) self:onListSelectionChanged(l, section, index) end
         end
     end
 end
@@ -57,6 +66,62 @@ function BlitzerFrame:onFrameClose()
     self.logRows = {}
 end
 
+function BlitzerFrame:onListSelectionChanged(list, section, index)
+    if list == self.logTable then
+        self.selectedLog = self.logRows[index]
+        self:updatePhoto()
+    else
+        self.selectedBlitzer = self.blitzerRows[index]
+    end
+    self:updateButtons()
+end
+
+function BlitzerFrame:updateButtons()
+    local row = self.selectedBlitzer
+    self.mapButtonInfo.disabled = self.currentTab ~= BlitzerFrame.TAB_BLITZER or row == nil
+    if row ~= nil and BlitzerManager.isMarked(row.x, row.z) then
+        self.mapButtonInfo.text = g_i18n:getText("blitzer_hide_on_map")
+    else
+        self.mapButtonInfo.text = g_i18n:getText("blitzer_show_on_map")
+    end
+    self:setMenuButtonInfoDirty()
+end
+
+function BlitzerFrame:onClickShowOnMap()
+    local row = self.selectedBlitzer
+    if row == nil then
+        return
+    end
+    BlitzerManager.toggleMapMarker(row.x, row.z)
+    self:updateButtons()
+end
+
+-- "photo card" next to the flash list: store picture of the flashed vehicle plus its data
+function BlitzerFrame:updatePhoto()
+    local e = self.selectedLog
+    local show = self.currentTab == BlitzerFrame.TAB_LOG and e ~= nil
+    for _, id in ipairs({ "photoTitle", "photoVehicle", "photoPlate", "photoSpeed", "photoPlace", "photoTime" }) do
+        if self[id] ~= nil then self[id]:setVisible(show) end
+    end
+    local imageFilename = nil
+    if show then
+        local item = e.xmlFilename ~= "" and g_storeManager:getItemByXMLFilename(e.xmlFilename) or nil
+        imageFilename = item ~= nil and item.imageFilename or nil
+        self.photoVehicle:setText(e.vehicleName ~= "" and e.vehicleName or "?")
+        self.photoPlate:setText(e.plate)
+        self.photoSpeed:setText(string.format("%d %s  (%s %d)", g_i18n:getSpeed(e.speed), g_i18n:getSpeedMeasuringUnit(),
+            g_i18n:getText("blitzer_limit_short"), g_i18n:getSpeed(e.limit)))
+        self.photoPlace:setText(string.format("X %d  Z %d", e.x, e.z))
+        self.photoTime:setText(string.format("%s %d, %02d:%02d", g_i18n:getText("blitzer_day"), e.day, e.hour, e.minute))
+    end
+    if self.photoImage ~= nil then
+        if imageFilename ~= nil then
+            self.photoImage:setImageFilename(imageFilename)
+        end
+        self.photoImage:setVisible(imageFilename ~= nil)
+    end
+end
+
 function BlitzerFrame:onClickTab(state)
     self:switchTab(state)
 end
@@ -82,7 +147,8 @@ function BlitzerFrame:collectData()
         if placeable.rootNode ~= nil and placeable.spec_blitzer ~= nil then
             local x, _, z = getWorldTranslation(placeable.rootNode)
             x, z = math.floor(x + 0.5), math.floor(z + 0.5)
-            table.insert(rows, { x = x, z = z, limit = placeable.spec_blitzer.speedLimit, count = counts[posKey(x, z)] or 0 })
+            local spec = placeable.spec_blitzer
+            table.insert(rows, { x = x, z = z, limit = spec.speedLimit, range = spec.range, angle = spec.angle, count = counts[posKey(x, z)] or 0 })
         end
     end
     table.sort(rows, function(a, b)
@@ -125,6 +191,8 @@ function BlitzerFrame:switchTab(tabIndex)
         end
     end
     self:reloadLists()
+    self:updatePhoto()
+    self:updateButtons()
     local list = tabIndex == 1 and self.blitzerTable or self.logTable
     if list ~= nil then
         FocusManager:setFocus(list)
@@ -147,6 +215,7 @@ function BlitzerFrame:populateCellForItemInSection(list, section, index, cell)
         local e = self.logRows[index]
         if e == nil then return end
         cell:getAttribute("colBlitzer"):setText(posText(e.x, e.z))
+        cell:getAttribute("colVehicle"):setText(e.vehicleName ~= "" and e.vehicleName or "?")
         cell:getAttribute("colSpeed"):setText(string.format("%d %s  (%s %d)",
             g_i18n:getSpeed(e.speed), g_i18n:getSpeedMeasuringUnit(), g_i18n:getText("blitzer_limit_short"), g_i18n:getSpeed(e.limit)))
         cell:getAttribute("colPlate"):setText(e.plate)
@@ -157,6 +226,7 @@ function BlitzerFrame:populateCellForItemInSection(list, section, index, cell)
         cell:getAttribute("colNr"):setText(tostring(index))
         cell:getAttribute("colPosition"):setText(posText(r.x, r.z))
         cell:getAttribute("colLimit"):setText(string.format("%d %s", g_i18n:getSpeed(r.limit), g_i18n:getSpeedMeasuringUnit()))
+        cell:getAttribute("colArea"):setText(string.format("%d m / %d°", r.range or 0, r.angle or 0))
         cell:getAttribute("colCount"):setText(tostring(r.count))
     end
 end

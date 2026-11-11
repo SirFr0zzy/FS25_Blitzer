@@ -46,11 +46,8 @@ function BlitzerManager.getIsAdmin()
     if mission == nil then
         return false
     end
-    if mission.isMasterUser then
-        return true
-    end
-    -- single player / local host
-    return g_server ~= nil and (mission.missionDynamicInfo == nil or not mission.missionDynamicInfo.isMultiplayer)
+    -- host/single player (server) or logged-in admin
+    return mission:getIsServer() or mission.isMasterUser == true
 end
 
 -- server side: is this client connection an admin?
@@ -88,6 +85,8 @@ function BlitzerManager.addEntry(placeable, vehicle, speed)
         x = math.floor(x + 0.5),
         z = math.floor(z + 0.5),
         plate = string.sub(getPlate(vehicle), 1, 40),
+        vehicleName = string.sub(vehicle.getFullName ~= nil and vehicle:getFullName() or "?", 1, 60),
+        xmlFilename = vehicle.configFileName or "",
         speed = math.min(speed, 65000),
         limit = placeable.spec_blitzer.speedLimit,
         day = env.currentMonotonicDay or env.currentDay or 0,
@@ -138,6 +137,8 @@ function BlitzerManager.saveLog()
         setXMLInt(xml, key .. "#x", e.x)
         setXMLInt(xml, key .. "#z", e.z)
         setXMLString(xml, key .. "#plate", e.plate)
+        setXMLString(xml, key .. "#vehicleName", e.vehicleName or "")
+        setXMLString(xml, key .. "#xmlFilename", e.xmlFilename or "")
         setXMLInt(xml, key .. "#speed", e.speed)
         setXMLInt(xml, key .. "#limit", e.limit)
         setXMLInt(xml, key .. "#day", e.day)
@@ -168,6 +169,8 @@ function BlitzerManager.loadLog()
             x = getXMLInt(xml, key .. "#x") or 0,
             z = getXMLInt(xml, key .. "#z") or 0,
             plate = getXMLString(xml, key .. "#plate") or "-",
+            vehicleName = getXMLString(xml, key .. "#vehicleName") or "",
+            xmlFilename = getXMLString(xml, key .. "#xmlFilename") or "",
             speed = getXMLInt(xml, key .. "#speed") or 0,
             limit = getXMLInt(xml, key .. "#limit") or 0,
             day = getXMLInt(xml, key .. "#day") or 0,
@@ -177,6 +180,72 @@ function BlitzerManager.loadLog()
         i = i + 1
     end
     delete(xml)
+end
+
+---------------------------------------------------------------------------
+-- Map marker ("show on map")
+---------------------------------------------------------------------------
+
+BlitzerHotspot = {}
+local BlitzerHotspot_mt = Class(BlitzerHotspot, MapHotspot)
+
+function BlitzerHotspot.new()
+    local self = MapHotspot.new(BlitzerHotspot_mt)
+    self.width, self.height = getNormalizedScreenValues(100, 100)
+    if g_overlayManager ~= nil and g_overlayManager.createOverlay ~= nil then
+        self.icon = g_overlayManager:createOverlay("mapHotspots.other", 0, 0, self.width, self.height)
+    end
+    if self.setColor ~= nil then self:setColor(1, 0.1, 0.1, 1) end
+    if self.setVisible ~= nil then self:setVisible(true) end
+    if self.setBlinking ~= nil then self:setBlinking(true) end
+    return self
+end
+
+function BlitzerHotspot:getCategory()
+    return MapHotspot.CATEGORY_OTHER
+end
+
+BlitzerManager.mark = nil   -- { hotspot, x, z }
+
+function BlitzerManager.isMarked(x, z)
+    local m = BlitzerManager.mark
+    return m ~= nil and m.x == x and m.z == z and g_currentMission.currentMapTargetHotspot == m.hotspot
+end
+
+function BlitzerManager.clearMarker()
+    local m = BlitzerManager.mark
+    if m ~= nil then
+        g_currentMission:removeMapHotspot(m.hotspot)
+        m.hotspot:delete()
+        if g_currentMission.currentMapTargetHotspot == m.hotspot then
+            g_currentMission:setMapTargetHotspot(nil)
+        end
+        BlitzerManager.mark = nil
+    end
+end
+
+function BlitzerManager.toggleMapMarker(x, z)
+    local wasMarked = BlitzerManager.isMarked(x, z)
+    BlitzerManager.clearMarker()
+    if wasMarked then
+        return
+    end
+    local hotspot = BlitzerHotspot.new()
+    hotspot:setWorldPosition(x, z)
+    if hotspot.setCategory ~= nil then hotspot:setCategory(MapHotspot.CATEGORY_OTHER) end
+    if hotspot.setMapWidget ~= nil then hotspot:setMapWidget(g_currentMission.hud.ingameMap) end
+    if hotspot.setOwnerFarmId ~= nil then hotspot:setOwnerFarmId(g_currentMission:getFarmId()) end
+    g_currentMission:addMapHotspot(hotspot)
+    g_currentMission:setMapTargetHotspot(hotspot)
+    BlitzerManager.mark = { hotspot = hotspot, x = x, z = z }
+end
+
+-- drop the marker once the player targets something else on the map
+function BlitzerManager:update(dt)
+    local m = BlitzerManager.mark
+    if m ~= nil and g_currentMission.currentMapTargetHotspot ~= m.hotspot then
+        BlitzerManager.clearMarker()
+    end
 end
 
 ---------------------------------------------------------------------------
@@ -249,6 +318,7 @@ function BlitzerManager:draw()
 end
 
 function BlitzerManager:deleteMap()
+    BlitzerManager.clearMarker()
     BlitzerManager.frame = nil
     BlitzerManager.placeables = {}
     BlitzerManager.log = {}

@@ -47,4 +47,27 @@
         <textAlignment value="center" />
         <textColor value="$preset_colorWhite_50" />
     </Profile>
+
+    <Profile name="blitzerPhoto" extends="baseReference" with="anchorTopRight">
+        <position value="-100px -70px"/>
+        <size value="300px 300px"/>
+    </Profile>
+
+    <Profile name="blitzerPhotoTitle" extends="baseReference" with="anchorTopRight">
+        <position value="-90px -10px"/>
+        <size value="320px 30px"/>
+        <textSize value="16px" />
+        <textBold value="true" />
+        <textUpperCase value="true" />
+        <textAlignment value="center" />
+        <textColor value="$preset_fs25_colorMainLight" />
+    </Profile>
+
+    <Profile name="blitzerPhotoText" extends="baseReference" with="anchorTopRight">
+        <size value="320px 26px"/>
+        <textSize value="14px" />
+        <textAlignment value="center" />
+        <textColor value="$preset_fs25_colorMainLight" />
+        <textLayoutMode value="truncate" />
+    </Profile>
 </GUIProfiles>

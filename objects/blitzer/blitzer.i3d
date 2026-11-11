@@ -994,7 +994,7 @@
       <Shape name="blitzerBody" shapeId="1" static="true" collisionFilterGroup="0x3e" collisionFilterMask="0xfffffbff" castsShadows="true" receiveShadows="true" clipDistance="200" materialIds="1,2,3,4,5" nodeId="5"/>
       <TransformGroup name="sensorNode" translation="0 1.62 0.19" nodeId="6"/>
       <TransformGroup name="panelNode" translation="0 1.30 -0.19" rotation="0 180 0" nodeId="7"/>
-      <Light name="flashLight" translation="0 0.78 0.7" type="point" color="12 12 12" emitDiffuse="true" emitSpecular="true" decayRate="2" range="14" castShadowMap="false" visibility="false" nodeId="8"/>
+      <Light name="flashLight" translation="0 0.78 0.7" type="point" color="14 0.15 0.1" emitDiffuse="true" emitSpecular="true" decayRate="2" range="14" castShadowMap="false" visibility="false" nodeId="8"/>
     </TransformGroup>
   </Scene>
 </i3D>

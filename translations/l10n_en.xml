@@ -25,5 +25,14 @@
         <text name="blitzer_limit_short" text="limit"/>
         <text name="blitzer_showrange" text="Show range"/>
         <text name="input_BLITZER_SHOW_RANGE" text="Speed camera: show range"/>
+        <text name="blitzer_changerange" text="Change range"/>
+        <text name="blitzer_changeangle" text="Change angle"/>
+        <text name="input_BLITZER_CHANGE_RANGE" text="Speed camera: change range"/>
+        <text name="input_BLITZER_CHANGE_ANGLE" text="Speed camera: change angle"/>
+        <text name="blitzer_col_area" text="Coverage"/>
+        <text name="blitzer_col_vehicle" text="Vehicle"/>
+        <text name="blitzer_photo_title" text="Speed camera photo"/>
+        <text name="blitzer_show_on_map" text="Show on map"/>
+        <text name="blitzer_hide_on_map" text="Remove from map"/>
     </texts>
 </l10n>

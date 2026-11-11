@@ -10,6 +10,8 @@ PlaceableBlitzer.FLASH_DURATION = 250      -- ms the flash light stays on
 PlaceableBlitzer.VEHICLE_COOLDOWN = 4000   -- ms before the same vehicle can be flashed again
 PlaceableBlitzer.INTERACT_DISTANCE = 3.0   -- m to the panel
 PlaceableBlitzer.RANGE_SHOW_TIME = 8000    -- ms the range outline stays visible
+PlaceableBlitzer.RANGE_MIN, PlaceableBlitzer.RANGE_MAX, PlaceableBlitzer.RANGE_STEP = 10, 60, 5      -- m
+PlaceableBlitzer.ANGLE_MIN, PlaceableBlitzer.ANGLE_MAX, PlaceableBlitzer.ANGLE_STEP = 30, 120, 15   -- degrees
 
 function PlaceableBlitzer.prerequisitesPresent(specializations)
     return true
@@ -31,11 +33,13 @@ end
 function PlaceableBlitzer.registerSavegameXMLPaths(schema, basePath)
     schema:setXMLSpecializationType("Blitzer")
     schema:register(XMLValueType.INT, basePath .. "#speedLimit", "Configured speed limit (km/h)")
+    schema:register(XMLValueType.INT, basePath .. "#range", "Configured detection range (m)")
+    schema:register(XMLValueType.INT, basePath .. "#angle", "Configured detection angle (degrees)")
     schema:setXMLSpecializationType()
 end
 
 function PlaceableBlitzer.registerFunctions(placeableType)
-    SpecializationUtil.registerFunction(placeableType, "setBlitzerLimit", PlaceableBlitzer.setBlitzerLimit)
+    SpecializationUtil.registerFunction(placeableType, "setBlitzerSettings", PlaceableBlitzer.setBlitzerSettings)
     SpecializationUtil.registerFunction(placeableType, "showBlitzerRange", PlaceableBlitzer.showBlitzerRange)
     SpecializationUtil.registerFunction(placeableType, "onBlitzerFlash", PlaceableBlitzer.onBlitzerFlash)
     SpecializationUtil.registerFunction(placeableType, "registerRangeAction", PlaceableBlitzer.registerRangeAction)
@@ -93,7 +97,7 @@ function BlitzerActivatable:run()
     if limit > spec.maxLimit then
         limit = spec.minLimit
     end
-    self.placeable:setBlitzerLimit(limit)
+    self.placeable:setBlitzerSettings(limit, spec.range, spec.angle)
 end
 
 ---------------------------------------------------------------------------
@@ -144,14 +148,18 @@ function PlaceableBlitzer:onDelete()
     spec.activatableAdded = false
 end
 
-function PlaceableBlitzer:setBlitzerLimit(limit, noEventSend)
+function PlaceableBlitzer:setBlitzerSettings(limit, range, angle, noEventSend)
     local spec = self.spec_blitzer
     limit = math.clamp(limit, spec.minLimit, spec.maxLimit)
-    if limit == spec.speedLimit then
+    range = math.clamp(range, PlaceableBlitzer.RANGE_MIN, PlaceableBlitzer.RANGE_MAX)
+    angle = math.clamp(angle, PlaceableBlitzer.ANGLE_MIN, PlaceableBlitzer.ANGLE_MAX)
+    if limit == spec.speedLimit and range == spec.range and angle == spec.angle then
         return
     end
-    BlitzerSetLimitEvent.sendEvent(self, limit, noEventSend)
+    BlitzerSetLimitEvent.sendEvent(self, limit, range, angle, noEventSend)
     spec.speedLimit = limit
+    spec.range = range
+    spec.angle = angle
     spec.activatable:updateText()
     self:showBlitzerRange()
 end
@@ -245,17 +253,25 @@ function PlaceableBlitzer:onUpdate(dt)
 end
 
 function PlaceableBlitzer:onWriteStream(streamId, connection)
-    streamWriteUInt8(streamId, self.spec_blitzer.speedLimit)
+    local spec = self.spec_blitzer
+    streamWriteUInt8(streamId, spec.speedLimit)
+    streamWriteUInt8(streamId, spec.range)
+    streamWriteUInt8(streamId, spec.angle)
 end
 
 function PlaceableBlitzer:onReadStream(streamId, connection)
     local spec = self.spec_blitzer
     spec.speedLimit = streamReadUInt8(streamId)
+    spec.range = streamReadUInt8(streamId)
+    spec.angle = streamReadUInt8(streamId)
     spec.activatable:updateText()
 end
 
 function PlaceableBlitzer:saveToXMLFile(xmlFile, key, usedModNames)
-    xmlFile:setValue(key .. "#speedLimit", self.spec_blitzer.speedLimit)
+    local spec = self.spec_blitzer
+    xmlFile:setValue(key .. "#speedLimit", spec.speedLimit)
+    xmlFile:setValue(key .. "#range", spec.range)
+    xmlFile:setValue(key .. "#angle", spec.angle)
 end
 
 function PlaceableBlitzer:loadFromXMLFile(xmlFile, key)
@@ -263,39 +279,78 @@ function PlaceableBlitzer:loadFromXMLFile(xmlFile, key)
     local limit = xmlFile:getValue(key .. "#speedLimit")
     if limit ~= nil then
         spec.speedLimit = math.clamp(limit, spec.minLimit, spec.maxLimit)
-        spec.activatable:updateText()
     end
+    local range = xmlFile:getValue(key .. "#range")
+    if range ~= nil then
+        spec.range = math.clamp(range, PlaceableBlitzer.RANGE_MIN, PlaceableBlitzer.RANGE_MAX)
+    end
+    local angle = xmlFile:getValue(key .. "#angle")
+    if angle ~= nil then
+        spec.angle = math.clamp(angle, PlaceableBlitzer.ANGLE_MIN, PlaceableBlitzer.ANGLE_MAX)
+    end
+    spec.activatable:updateText()
 end
 
 ---------------------------------------------------------------------------
 -- Range outline (temporary)
 ---------------------------------------------------------------------------
 
--- key while standing at the panel
+-- keys while standing at the panel: show area, change range, change angle
 function PlaceableBlitzer:registerRangeAction()
     local spec = self.spec_blitzer
+    spec.actionEventIds = {}
     g_inputBinding:beginActionEventsModification()
-    local _, eventId = g_inputBinding:registerActionEvent(InputAction.BLITZER_SHOW_RANGE, self,
-        PlaceableBlitzer.onShowRangeAction, false, true, false, true)
-    g_inputBinding:endActionEventsModification()
-    if eventId ~= nil then
-        g_inputBinding:setActionEventText(eventId, g_i18n:getText("blitzer_showrange"))
-        g_inputBinding:setActionEventTextVisibility(eventId, true)
-        g_inputBinding:setActionEventTextPriority(eventId, GS_PRIO_NORMAL)
+    local defs = {
+        { InputAction.BLITZER_SHOW_RANGE, PlaceableBlitzer.onShowRangeAction, "blitzer_showrange" },
+        { InputAction.BLITZER_CHANGE_RANGE, PlaceableBlitzer.onChangeRangeAction, "blitzer_changerange" },
+        { InputAction.BLITZER_CHANGE_ANGLE, PlaceableBlitzer.onChangeAngleAction, "blitzer_changeangle" },
+    }
+    for _, def in ipairs(defs) do
+        if def[1] ~= nil then
+            local _, eventId = g_inputBinding:registerActionEvent(def[1], self, def[2], false, true, false, true)
+            if eventId ~= nil then
+                g_inputBinding:setActionEventText(eventId, g_i18n:getText(def[3]))
+                g_inputBinding:setActionEventTextVisibility(eventId, true)
+                g_inputBinding:setActionEventTextPriority(eventId, GS_PRIO_NORMAL)
+                table.insert(spec.actionEventIds, eventId)
+            end
+        end
     end
-    spec.rangeActionEventId = eventId
+    g_inputBinding:endActionEventsModification()
 end
 
 function PlaceableBlitzer:removeRangeAction()
     local spec = self.spec_blitzer
-    if spec.rangeActionEventId ~= nil then
-        g_inputBinding:removeActionEvent(spec.rangeActionEventId)
-        spec.rangeActionEventId = nil
+    if spec.actionEventIds ~= nil then
+        for _, eventId in ipairs(spec.actionEventIds) do
+            g_inputBinding:removeActionEvent(eventId)
+        end
+        spec.actionEventIds = nil
     end
 end
 
 function PlaceableBlitzer:onShowRangeAction()
     self:showBlitzerRange()
+end
+
+local function cycle(value, step, min, max)
+    value = value + step
+    if value > max then
+        value = min
+    end
+    return value
+end
+
+function PlaceableBlitzer:onChangeRangeAction()
+    local spec = self.spec_blitzer
+    self:setBlitzerSettings(spec.speedLimit,
+        cycle(spec.range, PlaceableBlitzer.RANGE_STEP, PlaceableBlitzer.RANGE_MIN, PlaceableBlitzer.RANGE_MAX), spec.angle)
+end
+
+function PlaceableBlitzer:onChangeAngleAction()
+    local spec = self.spec_blitzer
+    self:setBlitzerSettings(spec.speedLimit, spec.range,
+        cycle(spec.angle, PlaceableBlitzer.ANGLE_STEP, PlaceableBlitzer.ANGLE_MIN, PlaceableBlitzer.ANGLE_MAX))
 end
 
 -- called every frame by BlitzerManager:draw()

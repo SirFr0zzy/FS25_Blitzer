@@ -35,11 +35,19 @@
 
     <actions>
         <action name="BLITZER_SHOW_RANGE" category="ONFOOT" axisType="HALF"/>
+        <action name="BLITZER_CHANGE_RANGE" category="ONFOOT" axisType="HALF"/>
+        <action name="BLITZER_CHANGE_ANGLE" category="ONFOOT" axisType="HALF"/>
     </actions>
 
     <inputBinding>
         <actionBinding action="BLITZER_SHOW_RANGE">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_b" axisComponent="+" neutralInput="0" index="1"/>
+        </actionBinding>
+        <actionBinding action="BLITZER_CHANGE_RANGE">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_n" axisComponent="+" neutralInput="0" index="1"/>
+        </actionBinding>
+        <actionBinding action="BLITZER_CHANGE_ANGLE">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_m" axisComponent="+" neutralInput="0" index="1"/>
         </actionBinding>
     </inputBinding>
 
