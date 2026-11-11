@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<modDesc descVersion="114">
+    <author>Elias</author>
+    <version>0.1.0.0</version>
+    <title>
+        <en>Blitzer Mod</en>
+        <de>Blitzer Mod</de>
+    </title>
+    <description>
+        <en><![CDATA[Handheld low poly speed radar gun. Buy it in the shop (Hand tools), equip it, aim at a vehicle and hold the trigger to read its speed.]]></en>
+        <de><![CDATA[Handliche Low-Poly-Radarpistole. Im Shop (Handwerkzeuge) kaufen, ausrüsten, auf ein Fahrzeug zielen und Auslöser halten, um dessen Geschwindigkeit zu messen.]]></de>
+    </description>
+    <iconFilename>store_icon.dds</iconFilename>
+    <multiplayer supported="true"/>
+
+    <extraSourceFiles>
+        <sourceFile filename="scripts/SpeedGunRegister.lua"/>
+    </extraSourceFiles>
+
+    <storeItems>
+        <storeItem xmlFilename="objects/speedGun/speedGun.xml"/>
+    </storeItems>
+
+    <l10n filenamePrefix="translations/l10n"/>
+</modDesc>

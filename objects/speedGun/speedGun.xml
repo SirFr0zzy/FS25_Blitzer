@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<handTool type="speedGun" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../shared/xml/schema/handTool.xsd">
+    <storeData>
+        <name>$l10n_speedgun_name</name>
+        <functions>
+            <function>$l10n_speedgun_function</function>
+        </functions>
+        <image>objects/speedGun/store_speedGun.dds</image>
+        <price>350</price>
+        <lifetime>1000</lifetime>
+        <dailyUpkeep>0</dailyUpkeep>
+        <showInStore>true</showInStore>
+        <rotation>0</rotation>
+        <brand>NONE</brand>
+        <species>HANDTOOL</species>
+        <category>handtoolsMisc</category>
+        <canBeSold>true</canBeSold>
+
+        <storeIconRendering>
+            <settings cameraXRot="-20" cameraYRot="40" zoomFactor="0.4"/>
+        </storeIconRendering>
+    </storeData>
+
+    <base>
+        <filename>objects/speedGun/speedGun.i3d</filename>
+        <typeDesc>$l10n_speedgun_name</typeDesc>
+        <graphics node="graphics" lockFirstPerson="true"/>
+        <handNode node="handNode"/>
+        <firstPersonNode node="firstPersonNode"/>
+    </base>
+
+    <speedGun maxDistance="300" raycastNode="raycastNode"/>
+
+    <bob>
+        <node node="graphics"/>
+    </bob>
+
+    <i3dMappings>
+        <i3dMapping id="graphics" node="0>0"/>
+        <i3dMapping id="handNode" node="0>1"/>
+        <i3dMapping id="firstPersonNode" node="0>2"/>
+        <i3dMapping id="raycastNode" node="0>3"/>
+    </i3dMappings>
+</handTool>

@@ -1,0 +1,11 @@
+<handTools>
+    <types>
+        <type name="speedGun" parent="base" xmlFile="objects/speedGun/speedGun.xml">
+            <specialization name="speedGun"/>
+        </type>
+    </types>
+
+    <specializations>
+        <specialization name="speedGun" className="SpeedGunHandTool" filename="scripts/SpeedGunHandTool.lua"/>
+    </specializations>
+</handTools>

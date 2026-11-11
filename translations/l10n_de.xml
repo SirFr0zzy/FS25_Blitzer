@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<l10n>
+    <texts>
+        <text name="speedgun_name" text="Blitzer Mod"/>
+        <text name="speedgun_function" text="Misst die Geschwindigkeit von Fahrzeugen."/>
+        <text name="speedgun_measure" text="Geschwindigkeit messen"/>
+        <text name="speedgun_no_target" text="Kein Ziel"/>
+    </texts>
+</l10n>
