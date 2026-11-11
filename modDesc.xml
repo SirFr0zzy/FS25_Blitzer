@@ -15,6 +15,7 @@
 
     <extraSourceFiles>
         <sourceFile filename="scripts/SpeedGunRegister.lua"/>
+        <sourceFile filename="scripts/BlitzerManager.lua"/>
     </extraSourceFiles>
 
     <placeableSpecializations>

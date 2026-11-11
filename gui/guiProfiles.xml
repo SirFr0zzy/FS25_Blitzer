@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUIProfiles>
+    <Profile name="blitzerHeaderBtn" extends="baseReference">
+        <imageColor value="0 0 0 0" />
+        <textSize value="13px" />
+        <textBold value="true" />
+        <textUpperCase value="true" />
+        <textColor value="$preset_colorWhite_50" />
+        <textAlignment value="left" />
+        <textOffset value="8px 0px" />
+        <textLayoutMode value="truncate" />
+    </Profile>
+
+    <Profile name="blitzerList" extends="emptyPanel" with="anchorStretchingYStretchingX pivotTopLeft">
+        <position value="0px -40px"/>
+        <absoluteSizeOffset value="0px 90px"/>
+    </Profile>
+
+    <Profile name="blitzerListItem" extends="baseReference" with="anchorTopStretchingX alternating">
+        <height value="30px"/>
+        <imageColor value="$preset_fs25_colorGrey" />
+        <imageSelectedColor value="$preset_fs25_colorMainHighlight" />
+        <alternateBackgroundColor value="$preset_fs25_colorGreyDark_50" />
+    </Profile>
+
+    <Profile name="blitzerCell" extends="baseReference" with="anchorStretchingYLeft">
+        <textSize value="12px" />
+        <textAlignment value="left" />
+        <textOffset value="8px 0px" />
+        <textColor value="$preset_fs25_colorMainLight" />
+        <textSelectedColor value="$preset_fs25_colorMainDark" />
+        <textLayoutMode value="truncate" />
+    </Profile>
+
+    <Profile name="blitzerSliderBox" extends="fs25_listSliderBox" with="anchorTopRight">
+    </Profile>
+
+    <Profile name="blitzerTabContainer" extends="emptyPanel" with="anchorStretchingYStretchingX pivotTopLeft">
+        <position value="0px -90px"/>
+        <absoluteSizeOffset value="0px 90px"/>
+    </Profile>
+
+    <Profile name="blitzerEmptyText" extends="baseReference" with="anchorTopCenter">
+        <position value="0px -70px"/>
+        <size value="600px 30px"/>
+        <textSize value="14px" />
+        <textAlignment value="center" />
+        <textColor value="$preset_colorWhite_50" />
+    </Profile>
+</GUIProfiles>

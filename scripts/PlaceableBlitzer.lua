@@ -3,8 +3,6 @@
 --    (and within range) that is faster than the configured limit triggers a flash.
 --  * The speed limit is changed at the column (interact near the panel, +10 km/h per press).
 
-source(Utils.getFilename("scripts/BlitzerEvents.lua", g_currentModDirectory))
-
 PlaceableBlitzer = {}
 
 PlaceableBlitzer.LIMIT_STEP = 10
@@ -127,11 +125,13 @@ end
 function PlaceableBlitzer:onFinalizePlacement()
     local spec = self.spec_blitzer
     spec.finalized = true
+    BlitzerManager.registerPlaceable(self)
     self:raiseActive()
 end
 
 function PlaceableBlitzer:onDelete()
     local spec = self.spec_blitzer
+    BlitzerManager.unregisterPlaceable(self)
     if spec.activatableAdded and g_currentMission ~= nil then
         g_currentMission.activatableObjectsSystem:removeActivatable(spec.activatable)
     end
@@ -149,21 +149,13 @@ function PlaceableBlitzer:setBlitzerLimit(limit, noEventSend)
     spec.activatable:updateText()
 end
 
-function PlaceableBlitzer:onBlitzerFlash(vehicle, speed)
+function PlaceableBlitzer:onBlitzerFlash()
     local spec = self.spec_blitzer
     spec.flashTimer = PlaceableBlitzer.FLASH_DURATION
     if spec.flashNode ~= nil then
         setVisibility(spec.flashNode, true)
     end
     self:raiseActive()
-
-    -- tell the driver (only on the machine that controls the vehicle)
-    if vehicle ~= nil and vehicle.getIsControlled ~= nil and vehicle:getIsControlled()
-        and g_currentMission ~= nil and g_currentMission.addIngameNotification ~= nil then
-        local text = string.format(g_i18n:getText("blitzer_flashed"), g_i18n:getSpeed(speed),
-            g_i18n:getSpeedMeasuringUnit(), g_i18n:getSpeed(spec.speedLimit), g_i18n:getSpeedMeasuringUnit())
-        g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_CRITICAL, text)
-    end
 end
 
 -- Server only: flash every vehicle inside the cone that is too fast.
@@ -193,7 +185,9 @@ function PlaceableBlitzer:checkBlitzerVehicles(dt)
                 -- in front of the lens, inside the cone (|x| <= z * tan(half angle)), inside range
                 if lz > 0.5 and math.abs(lx) <= lz * halfAngleTan and (lx * lx + lz * lz) <= spec.range * spec.range then
                     spec.cooldowns[vehicle] = PlaceableBlitzer.VEHICLE_COOLDOWN
-                    g_server:broadcastEvent(BlitzerFlashEvent.new(self, vehicle, math.floor(speed + 0.5)), true)
+                    -- everybody only sees the flash itself; speed/plate go to the admin log only
+                    g_server:broadcastEvent(BlitzerFlashEvent.new(self), true)
+                    BlitzerManager.addEntry(self, vehicle, math.floor(speed + 0.5))
                 end
             end
         end

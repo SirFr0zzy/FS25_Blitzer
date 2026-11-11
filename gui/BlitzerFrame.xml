@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUI name="blitzerAdminFrame">
+    <GuiElement profile="fs25_menuContainer">
+
+        <GuiElement profile="fs25_menuHeaderPanel">
+            <Text profile="fs25_menuHeaderTitle" text="$l10n_blitzer_menu_title"/>
+        </GuiElement>
+
+        <BoxLayout profile="fs25_subCategorySelectorTabbedBox" id="subCategoryBox"/>
+        <ThreePartBitmap profile="fs25_lineSeparatorTopHighlighted" position="0px -57px"/>
+        <MultiTextOption profile="fs25_subCategorySelectorTabbed" id="subCategoryPaging" position="0px -10px" onClick="onClickTab"/>
+        <Button profile="fs25_subCategorySelectorTabbedTab" id="selectorPrefab">
+            <ThreePartBitmap profile="fs25_subCategorySelectorTabbedTabBg" name="background"/>
+        </Button>
+
+        <!-- Tab 1: all Blitzer -->
+        <GuiElement profile="blitzerTabContainer" id="tabContainer1" visible="true">
+            <GuiElement profile="fs25_statisticsHeaderBox">
+                <Button profile="blitzerHeaderBtn" position="0px 0px"   size="90px 32px"  text="$l10n_blitzer_col_nr"/>
+                <Button profile="blitzerHeaderBtn" position="100px 0px" size="300px 32px" text="$l10n_blitzer_col_position"/>
+                <Button profile="blitzerHeaderBtn" position="410px 0px" size="200px 32px" text="$l10n_blitzer_col_limit"/>
+                <Button profile="blitzerHeaderBtn" position="620px 0px" size="200px 32px" text="$l10n_blitzer_col_count"/>
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px -2dp"/>
+            </GuiElement>
+            <SmoothList profile="blitzerList" id="blitzerTable">
+                <ListItem profile="blitzerListItem">
+                    <Text profile="blitzerCell" position="0px 0px"   size="90px 32px"  name="colNr"/>
+                    <Text profile="blitzerCell" position="100px 0px" size="300px 32px" name="colPosition"/>
+                    <Text profile="blitzerCell" position="410px 0px" size="200px 32px" name="colLimit"/>
+                    <Text profile="blitzerCell" position="620px 0px" size="200px 32px" name="colCount"/>
+                </ListItem>
+            </SmoothList>
+            <ThreePartBitmap profile="blitzerSliderBox">
+                <Slider profile="fs25_listSlider" dataElementId="blitzerTable"/>
+            </ThreePartBitmap>
+            <Text profile="blitzerEmptyText" id="blitzerEmptyText" text="$l10n_blitzer_none" visible="false"/>
+        </GuiElement>
+
+        <!-- Tab 2: all flashes -->
+        <GuiElement profile="blitzerTabContainer" id="tabContainer2" visible="false">
+            <GuiElement profile="fs25_statisticsHeaderBox">
+                <Button profile="blitzerHeaderBtn" position="0px 0px"   size="260px 32px" text="$l10n_blitzer_col_blitzer"/>
+                <Button profile="blitzerHeaderBtn" position="270px 0px" size="260px 32px" text="$l10n_blitzer_col_speed"/>
+                <Button profile="blitzerHeaderBtn" position="540px 0px" size="240px 32px" text="$l10n_blitzer_col_plate"/>
+                <Button profile="blitzerHeaderBtn" position="790px 0px" size="240px 32px" text="$l10n_blitzer_col_time"/>
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px -2dp"/>
+            </GuiElement>
+            <SmoothList profile="blitzerList" id="logTable">
+                <ListItem profile="blitzerListItem">
+                    <Text profile="blitzerCell" position="0px 0px"   size="260px 32px" name="colBlitzer"/>
+                    <Text profile="blitzerCell" position="270px 0px" size="260px 32px" name="colSpeed"/>
+                    <Text profile="blitzerCell" position="540px 0px" size="240px 32px" name="colPlate"/>
+                    <Text profile="blitzerCell" position="790px 0px" size="240px 32px" name="colTime"/>
+                </ListItem>
+            </SmoothList>
+            <ThreePartBitmap profile="blitzerSliderBox">
+                <Slider profile="fs25_listSlider" dataElementId="logTable"/>
+            </ThreePartBitmap>
+            <Text profile="blitzerEmptyText" id="logEmptyText" text="$l10n_blitzer_no_flashes" visible="false"/>
+        </GuiElement>
+
+    </GuiElement>
+</GUI>

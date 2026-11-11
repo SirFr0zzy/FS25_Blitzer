@@ -8,6 +8,20 @@
         <text name="blitzer_name" text="Blitzersäule"/>
         <text name="blitzer_function" text="Blitzt Fahrzeuge in einem 90-Grad-Bereich, die das eingestellte Tempolimit überschreiten. Das Limit wird an der Säule eingestellt."/>
         <text name="blitzer_setlimit" text="Tempolimit: %d %s (erhöhen)"/>
-        <text name="blitzer_flashed" text="Geblitzt! %d %s in einer %d %s Zone"/>
+        <text name="blitzer_menu_title" text="Blitzer"/>
+        <text name="blitzer_tab_blitzers" text="Blitzer"/>
+        <text name="blitzer_tab_flashes" text="Blitzungen"/>
+        <text name="blitzer_col_nr" text="Nr."/>
+        <text name="blitzer_col_position" text="Position"/>
+        <text name="blitzer_col_limit" text="Tempolimit"/>
+        <text name="blitzer_col_count" text="Blitzungen"/>
+        <text name="blitzer_col_blitzer" text="Blitzer"/>
+        <text name="blitzer_col_speed" text="Geschwindigkeit"/>
+        <text name="blitzer_col_plate" text="Kennzeichen"/>
+        <text name="blitzer_col_time" text="Datum / Uhrzeit"/>
+        <text name="blitzer_none" text="Keine Blitzer aufgestellt."/>
+        <text name="blitzer_no_flashes" text="Noch keine Blitzungen."/>
+        <text name="blitzer_day" text="Tag"/>
+        <text name="blitzer_limit_short" text="Limit"/>
     </texts>
 </l10n>

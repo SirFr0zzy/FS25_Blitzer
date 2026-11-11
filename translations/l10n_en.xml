@@ -8,6 +8,20 @@
         <text name="blitzer_name" text="Speed Camera Column"/>
         <text name="blitzer_function" text="Flashes vehicles in a 90 degree cone that exceed the set speed limit. The limit is set at the column."/>
         <text name="blitzer_setlimit" text="Speed limit: %d %s (press to raise)"/>
-        <text name="blitzer_flashed" text="Flashed! %d %s in a %d %s zone"/>
+        <text name="blitzer_menu_title" text="Speed Cameras"/>
+        <text name="blitzer_tab_blitzers" text="Cameras"/>
+        <text name="blitzer_tab_flashes" text="Flashes"/>
+        <text name="blitzer_col_nr" text="No."/>
+        <text name="blitzer_col_position" text="Position"/>
+        <text name="blitzer_col_limit" text="Speed limit"/>
+        <text name="blitzer_col_count" text="Flashes"/>
+        <text name="blitzer_col_blitzer" text="Camera"/>
+        <text name="blitzer_col_speed" text="Speed"/>
+        <text name="blitzer_col_plate" text="License plate"/>
+        <text name="blitzer_col_time" text="Date / time"/>
+        <text name="blitzer_none" text="No speed cameras placed."/>
+        <text name="blitzer_no_flashes" text="No flashes recorded yet."/>
+        <text name="blitzer_day" text="Day"/>
+        <text name="blitzer_limit_short" text="limit"/>
     </texts>
 </l10n>
