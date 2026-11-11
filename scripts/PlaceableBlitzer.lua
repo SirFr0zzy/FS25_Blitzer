@@ -7,6 +7,7 @@ PlaceableBlitzer = {}
 
 PlaceableBlitzer.LIMIT_STEP = 10
 PlaceableBlitzer.FLASH_DURATION = 250      -- ms the flash light stays on
+PlaceableBlitzer.TOLERANCE = 3            -- km/h above the limit before a vehicle is flashed
 PlaceableBlitzer.VEHICLE_COOLDOWN = 4000   -- ms before the same vehicle can be flashed again
 PlaceableBlitzer.INTERACT_DISTANCE = 3.0   -- m to the panel
 PlaceableBlitzer.RANGE_SHOW_TIME = 8000    -- ms the range outline stays visible
@@ -199,7 +200,7 @@ function PlaceableBlitzer:checkBlitzerVehicles(dt)
         if vehicle.getLastSpeed ~= nil and vehicle.rootNode ~= nil and vehicle.rootVehicle == vehicle
             and spec.cooldowns[vehicle] == nil then
             local speed = math.abs(vehicle:getLastSpeed() or 0)
-            if speed > spec.speedLimit then
+            if speed >= spec.speedLimit + PlaceableBlitzer.TOLERANCE then
                 local wx, wy, wz = getWorldTranslation(vehicle.rootNode)
                 local lx, _, lz = worldToLocal(spec.sensorNode, wx, wy, wz)
                 -- in front of the lens, inside the cone (|x| <= z * tan(half angle)), inside range
